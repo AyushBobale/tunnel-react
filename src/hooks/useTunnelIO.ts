@@ -26,12 +26,10 @@ export function useTunnelIO(args: TunnelIOProps) {
           console.log("Channel open : ", channel);
         },
         onmessage(e) {
-          console.log("Hook msg", e);
           setTunnelState((prev) => ({
             ...prev,
             messages: e,
           }));
-          console.log("Message : ", e);
         },
         onclose(e, channel) {
           console.log("Channel close : ", channel);
