@@ -1,5 +1,10 @@
 import { useRef, useEffect, useState } from "react";
-import { TunnelIO, TunnelIOArgs, TunnelHookArgs } from "@ayushbobale/tunnel-io";
+import {
+  TunnelIO,
+  TunnelIOArgs,
+  TunnelHookArgs,
+  MessageType,
+} from "@ayushbobale/tunnel-io";
 
 export type TunnelIOProps = { tunnelArgs: TunnelIOArgs };
 
@@ -8,7 +13,7 @@ export function useTunnelIO(args: TunnelIOProps) {
   const tunnelIORef = useRef<TunnelIO | null>(null);
   const [tunnelState, setTunnelState] = useState<{
     localDescription: RTCSessionDescription | null;
-    messages: string[];
+    messages: MessageType[];
   }>({ localDescription: null, messages: [] });
 
   const hookArgs: TunnelHookArgs = {
@@ -20,12 +25,13 @@ export function useTunnelIO(args: TunnelIOProps) {
         onopen(e, channel) {
           console.log("Channel open : ", channel);
         },
-        onmessage(e, channel) {
+        onmessage(e) {
+          console.log("Hook msg", e);
           setTunnelState((prev) => ({
             ...prev,
-            messages: [...prev.messages, e.data],
+            messages: e,
           }));
-          console.log("Message : ", e.data, channel);
+          console.log("Message : ", e);
         },
         onclose(e, channel) {
           console.log("Channel close : ", channel);
@@ -51,7 +57,10 @@ export function useTunnelIO(args: TunnelIOProps) {
   }
 
   function sendMessage(msg: string) {
-    tunnelIORef.current?.sendMessage(msg);
+    const newMessages = tunnelIORef.current?.sendMessage(msg);
+    if (newMessages) {
+      setTunnelState((prev) => ({ ...prev, messages: newMessages }));
+    }
   }
 
   useEffect(() => {
