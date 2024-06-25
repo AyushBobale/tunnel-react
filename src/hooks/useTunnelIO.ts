@@ -6,7 +6,13 @@ import {
   MessageType,
 } from "@ayushbobale/tunnel-io";
 
-export type TunnelIOProps = { tunnelArgs: TunnelIOArgs };
+export type UseTunnelIOProps = {
+  videoRefs?: {
+    local: React.RefObject<HTMLVideoElement>;
+    remote: React.RefObject<HTMLVideoElement>;
+  };
+};
+export type TunnelIOProps = { tunnelArgs: TunnelIOArgs & UseTunnelIOProps };
 
 export function useTunnelIO(args: TunnelIOProps) {
   const { tunnelArgs } = args;
@@ -35,6 +41,15 @@ export function useTunnelIO(args: TunnelIOProps) {
           console.log("Channel close : ", channel);
         },
       },
+      ontrack: (stream) => {
+        if (
+          tunnelArgs.videoRefs &&
+          tunnelArgs.videoRefs.remote &&
+          tunnelArgs.videoRefs.remote.current
+        ) {
+          tunnelArgs.videoRefs.remote.current.srcObject = stream;
+        }
+      },
     },
   };
 
@@ -61,6 +76,18 @@ export function useTunnelIO(args: TunnelIOProps) {
     }
   }
 
+  async function setMediaDevicesVideo() {
+    const stream = await tunnelIORef.current?.getMediaDevicesVideo();
+    if (
+      stream &&
+      tunnelArgs.videoRefs &&
+      tunnelArgs.videoRefs.local &&
+      tunnelArgs.videoRefs.local.current
+    ) {
+      tunnelArgs.videoRefs.local.current.srcObject = stream;
+    }
+  }
+
   useEffect(() => {
     if (!tunnelIORef.current) {
       initialize(tunnelArgs);
@@ -73,5 +100,6 @@ export function useTunnelIO(args: TunnelIOProps) {
     reInitalize: initialize,
     setPeer,
     sendMessage,
+    setMediaDevicesVideo,
   };
 }
