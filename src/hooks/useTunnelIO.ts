@@ -88,6 +88,12 @@ export function useTunnelIO(args: TunnelIOProps) {
     }
   }
 
+  function sendFiles(files: FileList) {
+    tunnelIORef.current?.sendFiles(files, (progress) =>
+      console.log("Progess", progress)
+    );
+  }
+
   useEffect(() => {
     if (!tunnelIORef.current) {
       initialize(tunnelArgs);
@@ -101,5 +107,6 @@ export function useTunnelIO(args: TunnelIOProps) {
     setPeer,
     sendMessage,
     setMediaDevicesVideo,
+    sendFiles,
   };
 }
