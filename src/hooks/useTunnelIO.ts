@@ -4,6 +4,8 @@ import {
   TunnelIOArgs,
   TunnelHookArgs,
   MessageType,
+  FileShareProgessArgs,
+  FileShareProgessFunc,
 } from "@ayushbobale/tunnel-io";
 
 export type UseTunnelIOProps = {
@@ -21,6 +23,10 @@ export function useTunnelIO(args: TunnelIOProps) {
     localDescription: RTCSessionDescription | null;
     messages: MessageType[];
   }>({ localDescription: null, messages: [] });
+  const [fileShareProgress, setFileShareProgress] =
+    useState<FileShareProgessArgs>({
+      files: {},
+    });
 
   const hookArgs: TunnelHookArgs = {
     cbs: {
@@ -50,6 +56,7 @@ export function useTunnelIO(args: TunnelIOProps) {
           tunnelArgs.videoRefs.remote.current.srcObject = stream;
         }
       },
+      fileShareProgress: (progress) => setFileShareProgress(progress),
     },
   };
 
@@ -89,9 +96,7 @@ export function useTunnelIO(args: TunnelIOProps) {
   }
 
   function sendFiles(files: FileList) {
-    tunnelIORef.current?.sendFiles(files, (progress) =>
-      console.log("Progess", progress)
-    );
+    tunnelIORef.current?.sendFiles(files);
   }
 
   useEffect(() => {
@@ -103,6 +108,7 @@ export function useTunnelIO(args: TunnelIOProps) {
 
   return {
     tunnelState,
+    fileShareProgress,
     reInitalize: initialize,
     setPeer,
     sendMessage,
